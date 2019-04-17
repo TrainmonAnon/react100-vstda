@@ -1,0 +1,1 @@
+This is a project in React100 where you can create todo items with a selected priority, and add them to a list which you can edit, delete, or mark as completed.

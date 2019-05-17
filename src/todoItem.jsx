@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-class TodoItem extends Component {
+const colors = ['success', 'warning', 'danger', 'dark'];
+
+export default class TodoItem extends Component {
   constructor(props) {
     super(props);
+    const color = colors[this.props.priority - 1];
 
     this.state = {
       text: props.text,
       priority: props.priority,
       id: props.id,
       completed: props.completed,
-      color: this.getColor(props.priority),
+      color,
       isEditing: false,
     };
   }
@@ -25,19 +29,6 @@ class TodoItem extends Component {
     clearInterval(this.timerID);
   }
 
-  getColor(priority) {
-    switch (priority) {
-      case '1':
-        return 'success';
-      case '2':
-        return 'warning';
-      case '3':
-        return 'danger';
-      default:
-        return 'dark';
-    }
-  }
-
   tick() {
     this.setState({
       date: new Date()
@@ -47,9 +38,9 @@ class TodoItem extends Component {
   toggleEdit() {
     this.setState({
       isEditing: !this.state.isEditing,
-      color: this.getColor(this.state.priority),
+      color: colors[this.state.priority - 1],
     });
-    if (!this.state.isEditing){
+    if (!this.state.isEditing) {
       this.props.update('update', this.props.id, this.state);
     }
   }
@@ -83,10 +74,10 @@ class TodoItem extends Component {
             <input type='checkbox' id='completed' onClick={ e => this.update(e) } />
             {this.state.text}
             <button className='edit-todo' onClick={ () => this.toggleEdit() }>
-              <span className='glyphicon glyphicon-edit' />
+              <span className='fas fa-edit' />
             </button>
             <button className='delete-todo' onClick={ () => this.props.update('delete', this.props.id, {}) }>
-              <span className='glyphicon glyphicon-trash' />
+              <span className='fas fa-trash-alt' />
             </button>
           </p>
         </div>
@@ -94,5 +85,10 @@ class TodoItem extends Component {
     );
   }
 }
-
-export default TodoItem;
+TodoItem.propTypes = {
+  text: PropTypes.string,
+  priority: PropTypes.string,
+  id: PropTypes.number,
+  completed: PropTypes.bool,
+  update: PropTypes.func,
+};

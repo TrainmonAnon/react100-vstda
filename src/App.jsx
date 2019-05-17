@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import TodoItem from './todoItem';
 
-class App extends Component {
+export default class App extends Component {
   constructor() {
     super();
+
     this.state = {
       todos: [],
       currentText: '',
@@ -14,45 +16,61 @@ class App extends Component {
     this.updateTodo = this.updateTodo.bind(this);
   }
   createTodo() {
-    const array = [...this.state.todos];
-    array.push(
+    axios.post('/api/TodoItems',
       {
-        text: this.state.currentText,
+        name: this.state.currentText,
         priority: this.state.currentPriority,
-        id: this.state.id,
+        todoItemId: this.state.id,
         completed: false,
-        color: '',
-        isEditing: false,
+      })
+      .then(() => {
+        axios.get('/api/TodoItems')
+          .then(res =>
+            this.setState({
+              todos: res.data,
+              id: this.state.id + 1,
+            })
+          );
       });
-    this.setState({
-      todos: array,
-      id: this.state.id + 1,
-    });
   }
   update(e) {
     this.setState({
       [e.target.id]: e.target.value,
     });
   }
-  updateTodo(type, index, state) {
-    const array = [...this.state.todos];
-    for (let i = 0; i < array.length; i += 1) {
-      if (array[i].id === index) {
-        switch (type) {
-          case 'delete':
-            array.splice(i, 1);
-            break;
-          case 'update':
-            array[i] = state;
-            break;
-          default:
-            break;
-        }
-        this.setState({
-          todos: array,
-        });
-        return;
-      }
+  updateTodo(type, state) {
+    console.log(state);
+    switch (type) {
+      case 'delete':
+        axios.delete(`/api/TodoItems/${state.id}`)
+          .then(() => {
+            axios.get('/api/TodoItems')
+              .then(res =>
+                this.setState({
+                  todos: res.data,
+                })
+              );
+          });
+        break;
+      case 'update':
+        axios.post('/api/TodoItems',
+          {
+            name: state.text,
+            priority: state.priority,
+            todoItemId: state.id,
+            completed: state.completed,
+          })
+          .then(() => {
+            axios.get('/api/TodoItems')
+              .then(res =>
+                this.setState({
+                  todos: res.data,
+                })
+              );
+          });
+        break;
+      default:
+        break;
     }
   }
   sort(type) {
@@ -61,7 +79,7 @@ class App extends Component {
     const array = [...this.state.todos];
     switch (type) {
       case 'id':
-        array.sort((a, b) => a.id - b.id);
+        array.sort((a, b) => a.todoItemId - b.todoItemId);
         break;
       case 'priority':
         array.sort((a, b) => a.priority - b.priority);
@@ -125,12 +143,9 @@ class App extends Component {
                 <ul className='list-group'>
                   {this.state.todos.map(todo => (
                     <TodoItem
-                      key={ todo.id }
-                      text={ todo.text }
-                      priority={ todo.priority }
-                      id={ todo.id }
-                      completed={ todo.completed }
-                      update={ this.updateTodo }
+                      key={ todo.todoItemId }
+                      data={ todo }
+                      update={ (type, state) => this.updateTodo(type, state) }
                     />
                   ))}
                 </ul>
@@ -153,5 +168,3 @@ class App extends Component {
     );
   }
 }
-
-export default App;

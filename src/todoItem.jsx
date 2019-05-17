@@ -6,13 +6,13 @@ const colors = ['success', 'warning', 'danger', 'dark'];
 export default class TodoItem extends Component {
   constructor(props) {
     super(props);
-    const color = colors[this.props.priority - 1];
+    const color = colors[this.props.data.priority - 1];
 
     this.state = {
-      text: props.text,
-      priority: props.priority,
-      id: props.id,
-      completed: props.completed,
+      text: props.data.name,
+      priority: props.data.priority,
+      id: props.data.todoItemId,
+      completed: props.data.completed,
       color,
       isEditing: false,
     };
@@ -41,7 +41,7 @@ export default class TodoItem extends Component {
       color: colors[this.state.priority - 1],
     });
     if (!this.state.isEditing) {
-      this.props.update('update', this.props.id, this.state);
+      this.props.update('update', this.state);
     }
   }
 
@@ -49,6 +49,10 @@ export default class TodoItem extends Component {
     this.setState({
       [e.target.id]: e.target.value,
     });
+  }
+
+  delete() {
+    this.props.update('delete', this.state);
   }
 
   render() {
@@ -76,7 +80,7 @@ export default class TodoItem extends Component {
             <button className='edit-todo' onClick={ () => this.toggleEdit() }>
               <span className='fas fa-edit' />
             </button>
-            <button className='delete-todo' onClick={ () => this.props.update('delete', this.props.id, {}) }>
+            <button className='delete-todo' onClick={ () => this.delete() }>
               <span className='fas fa-trash-alt' />
             </button>
           </p>
@@ -86,9 +90,11 @@ export default class TodoItem extends Component {
   }
 }
 TodoItem.propTypes = {
-  text: PropTypes.string,
-  priority: PropTypes.string,
-  id: PropTypes.number,
-  completed: PropTypes.bool,
+  data: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    priority: PropTypes.string,
+    todoItemId: PropTypes.number,
+    completed: PropTypes.bool,
+  }),
   update: PropTypes.func,
 };
